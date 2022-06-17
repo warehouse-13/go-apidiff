@@ -32,10 +32,11 @@ import (
 )
 
 type Options struct {
-	RepoPath       string
-	OldCommit      string
-	NewCommit      string
-	CompareImports bool
+	RepoPath                string
+	OldCommit               string
+	NewCommit               string
+	CompareImports          bool
+	WhitelistedPackagePaths []string
 }
 
 func Run(opts Options) (*Diff, error) {
@@ -79,12 +80,12 @@ func Run(opts Options) (*Diff, error) {
 		}
 	}()
 
-	selfOld, importsOld, err := getPackages(*wt, *oldHash)
+	selfOld, importsOld, err := getPackages(*wt, *oldHash, opts.WhitelistedPackagePaths)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get packages from old commit %q (%s): %w", opts.OldCommit, oldHash, err)
 	}
 
-	selfNew, importsNew, err := getPackages(*wt, *newHash)
+	selfNew, importsNew, err := getPackages(*wt, *newHash, opts.WhitelistedPackagePaths)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get packages from new commit %q (%s): %w", opts.NewCommit, newHash, err)
 	}
@@ -174,7 +175,7 @@ func getHashes(repo *git.Repository, oldRev, newRev plumbing.Revision) (*plumbin
 	return oldCommitHash, newCommitHash, nil
 }
 
-func getPackages(wt git.Worktree, hash plumbing.Hash) (map[string]*packages.Package, map[string]*packages.Package, error) {
+func getPackages(wt git.Worktree, hash plumbing.Hash, dirs []string) (map[string]*packages.Package, map[string]*packages.Package, error) {
 	if err := wt.Checkout(&git.CheckoutOptions{Hash: hash, Force: true}); err != nil {
 		return nil, nil, err
 	}
@@ -195,7 +196,17 @@ func getPackages(wt git.Worktree, hash plumbing.Hash) (map[string]*packages.Pack
 		Tests:      false,
 		BuildFlags: []string{goFlags},
 	}
-	pkgs, err := packages.Load(&cfg, "./...")
+
+	patterns := []string{"./..."}
+
+	// whitelist packages to scan if set by the --packages flag
+	// nb: this goes against the original purpose of this tool, but we needed it
+	// for a thing
+	if len(dirs) > 0 {
+		patterns = dirs
+	}
+
+	pkgs, err := packages.Load(&cfg, patterns...)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -207,6 +218,7 @@ func getPackages(wt git.Worktree, hash plumbing.Hash) (map[string]*packages.Pack
 		if strings.HasSuffix(pkg.PkgPath, "/internal") || strings.Contains(pkg.PkgPath, "/internal/") {
 			continue
 		}
+
 		selfPkgs[pkg.PkgPath] = pkg
 	}
 	for _, pkg := range pkgs {

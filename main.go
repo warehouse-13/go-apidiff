@@ -90,9 +90,10 @@ and HEAD is used for newCommit."`,
 		os.Exit(2)
 	}
 
-	cmd.Flags().StringVar(&opts.RepoPath, "repo-path", cwd, "Path to root of git repository to compare")
-	cmd.Flags().BoolVar(&opts.CompareImports, "compare-imports", false, "Compare exported API differences of the imports in the repo. ")
-	cmd.Flags().BoolVar(&printCompatible, "print-compatible", false, "Print compatible API changes")
+	cmd.Flags().StringVar(&opts.RepoPath, "repo-path", cwd, "Path to root of git repository to compare.")
+	cmd.Flags().BoolVar(&opts.CompareImports, "compare-imports", false, "Compare exported API differences of the imports in the repo.")
+	cmd.Flags().BoolVar(&printCompatible, "print-compatible", false, "Print compatible API changes.")
+	cmd.Flags().StringSliceVar(&opts.WhitelistedPackagePaths, "packages", []string{}, "List of paths to packages to scan, relative to module root, eg `./api/...`")
 
 	return cmd
 }
