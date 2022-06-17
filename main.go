@@ -22,7 +22,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/joelanford/go-apidiff/pkg/diff"
+	"github.com/warehouse-13/go-apidiff/pkg/diff"
 )
 
 func main() {

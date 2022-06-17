@@ -28,7 +28,7 @@ import (
 	"golang.org/x/exp/apidiff"
 	"golang.org/x/tools/go/packages"
 
-	"github.com/joelanford/go-apidiff/pkg/diff/internal/osfs"
+	"github.com/warehouse-13/go-apidiff/pkg/diff/internal/osfs"
 )
 
 type Options struct {

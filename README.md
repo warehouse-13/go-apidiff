@@ -1,3 +1,6 @@
+
+## This is a fork and changes have been made, documentation will be updated st some point
+
 # go-apidiff
 Check API compatibility between different revisions of a Go project
 
