@@ -175,7 +175,7 @@ func getHashes(repo *git.Repository, oldRev, newRev plumbing.Revision) (*plumbin
 	return oldCommitHash, newCommitHash, nil
 }
 
-func getPackages(wt git.Worktree, hash plumbing.Hash, dirs []string) (map[string]*packages.Package, map[string]*packages.Package, error) {
+func getPackages(wt git.Worktree, hash plumbing.Hash, paths []string) (map[string]*packages.Package, map[string]*packages.Package, error) {
 	if err := wt.Checkout(&git.CheckoutOptions{Hash: hash, Force: true}); err != nil {
 		return nil, nil, err
 	}
@@ -202,8 +202,8 @@ func getPackages(wt git.Worktree, hash plumbing.Hash, dirs []string) (map[string
 	// whitelist packages to scan if set by the --packages flag
 	// nb: this goes against the original purpose of this tool, but we needed it
 	// for a thing
-	if len(dirs) > 0 {
-		patterns = dirs
+	if len(paths) > 0 {
+		patterns = paths
 	}
 
 	pkgs, err := packages.Load(&cfg, patterns...)
